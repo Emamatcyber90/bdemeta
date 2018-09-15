@@ -5,7 +5,6 @@ import json
 import os.path
 import pathlib
 import shutil
-import signal
 import subprocess
 import sys
 from typing import Callable, List, TextIO
@@ -42,6 +41,8 @@ def test_runner(command: List[str]) -> RunResult:
             return RunResult.NO_SUCH_CASE
         else:
             return RunResult.FAILURE
+    except KeyboardInterrupt:
+        return RunResult.NO_SUCH_CASE
     return RunResult.SUCCESS
 
 def get_columns() -> int:
@@ -88,7 +89,6 @@ def run(stdout:      TextIO,
         targets = bdemeta.resolver.resolve(resolver, args)
         bdemeta.cmake.generate(targets, writer)
     elif mode == 'runtests':
-        signal.signal(signal.SIGINT, signal.SIG_DFL)
         tests = args or glob.glob(os.path.join('.', '*.t'))
         return bdemeta.testing.run_tests(stdout,
                                          stderr,
